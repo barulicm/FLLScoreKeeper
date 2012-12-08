@@ -9,9 +9,9 @@
 <currentDirectory>..</currentDirectory>
 <embeddedJar>true</embeddedJar>
 <executableName>FLL Control.exe</executableName>
-<iconLocation>..\src\images\FLL-logo.png</iconLocation>
+<iconLocation>..\..\FLL Control\src\images\FLL-logo.png</iconLocation>
 <initialMemoryHeap>-1</initialMemoryHeap>
-<jarLocation>..\bin\FLL Control.jar</jarLocation>
+<jarLocation>..\JARs\FLL Control.jar</jarLocation>
 <mainClassName>FLLControl</mainClassName>
 <maximumMemoryHeap>-1</maximumMemoryHeap>
 <maximumVersion></maximumVersion>

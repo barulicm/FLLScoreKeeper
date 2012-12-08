@@ -38,15 +38,16 @@ public class FLLDisplay extends JFrame {
 			public void componentResized(ComponentEvent e) {
 				timerDisplay.setPreferredSize(new Dimension(window.getContentPane().getSize().width, window.getContentPane().getSize().height / 4));
 				upNextDisplay.setPreferredSize(new Dimension(window.getContentPane().getSize().width, window.getContentPane().getSize().height / 4));
-				upNextDisplay.setRowHeight(Math.max(10,upNextDisplay.getSize().height / upNextDisplay.getRowCount() + 3));
+				if(upNextDisplay.getRowCount() > 0)
+					upNextDisplay.setRowHeight(Math.max(10,upNextDisplay.getSize().height / upNextDisplay.getRowCount() + 1));
 				scoreDisplay.setPreferredSize(new Dimension(window.getContentPane().getSize().width, window.getContentPane().getSize().height / 2));
-				scoreDisplay.setRowHeight(Math.max(10,scoreDisplay.getSize().height / 13));
+				if(scoreDisplay.getRowCount() > 0)
+					scoreDisplay.setRowHeight(Math.max(10,scoreDisplay.getSize().height / 13));
 			}
 		});
 		
 		teams = new TeamList();
 		schedule = new TeamScheduler();
-		TeamLoader.LoadTeams("teamforMatchImport.csv", teams, schedule);
 		
 		timerDisplay = new JLabel("00:00", JLabel.CENTER);
 		timerDisplay.setBackground(Color.YELLOW);
@@ -136,6 +137,35 @@ public class FLLDisplay extends JFrame {
 			Team t = teams.getTeamWithNumber(teamNumber);
 			t.setScore(round, score);
 			teams.update();
+		}
+		else if(tokens[0].equals("addTeam")) {
+			String[] args = tokens[1].split(",");
+			int teamNumber = Integer.parseInt(args[0]);
+			String teamName = args[1];
+			Team t = new Team();
+			t.name = teamName;
+			t.number = teamNumber;
+			teams.addTeam(t);
+		}
+		else if(tokens[0].equals("assignMatch")) {
+			String[] args = tokens[1].split(",");
+			int matchNumber = Integer.parseInt(args[0]);
+			int teamNumber = Integer.parseInt(args[1]);
+			int tableNumber = Integer.parseInt(args[2]);
+			Team t = teams.getTeamWithNumber(teamNumber);
+			schedule.addTeamToRound(t, matchNumber, tableNumber);
+		}
+		else if(tokens[0].equals("setTables")) {
+			String[] args = tokens[1].split(",");
+			schedule.setTables(args);
+		}
+		else if(tokens[0].equals("setTPT")) {
+			int tpt = Integer.parseInt(tokens[1]);
+			schedule.teamsPerTable = tpt;
+		}
+		else if(tokens[0].equals("clearSched")) {
+			teams.clear();
+			schedule.clear();
 		}
 	}
 	

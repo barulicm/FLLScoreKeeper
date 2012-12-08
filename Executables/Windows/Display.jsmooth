@@ -6,12 +6,12 @@
 <JVMSearchPath>jdkpath</JVMSearchPath>
 <JVMSearchPath>exepath</JVMSearchPath>
 <JVMSearchPath>jview</JVMSearchPath>
-<currentDirectory>D:\Eclipse_Workspace\FLL Display</currentDirectory>
+<currentDirectory>..</currentDirectory>
 <embeddedJar>true</embeddedJar>
 <executableName>FLL Display.exe</executableName>
-<iconLocation>..\src\images\FLL-logo.png</iconLocation>
+<iconLocation>..\..\FLL Display\src\images\FLL-logo.png</iconLocation>
 <initialMemoryHeap>-1</initialMemoryHeap>
-<jarLocation>..\bin\FLL Display.jar</jarLocation>
+<jarLocation>..\JARs\FLL Display.jar</jarLocation>
 <mainClassName>FLLDisplay</mainClassName>
 <maximumMemoryHeap>-1</maximumMemoryHeap>
 <maximumVersion></maximumVersion>

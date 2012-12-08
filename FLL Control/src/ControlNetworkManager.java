@@ -9,9 +9,12 @@ public class ControlNetworkManager {
 	private List<PrintStream> outputs;
 	private int port;
 	private Thread monitorThread;
+	private boolean monitoring;
+	private FLLControl control;
 	
-	public ControlNetworkManager(int port) {
+	public ControlNetworkManager(FLLControl control, int port) {
 		this.port = port;
+		this.control = control;
 		init();
 	}
 	
@@ -20,14 +23,16 @@ public class ControlNetworkManager {
 			serverSocket = new ServerSocket(port);
 			sockets = new LinkedList<Socket>();
 			outputs = new LinkedList<PrintStream>();
+			monitoring = true;
 			monitorThread = new Thread(new Runnable() {
 				@Override
 				public void run() {
 					try {
-						while(true) {
+						while(monitoring) {
 							Socket skt = serverSocket.accept();
 							sockets.add(skt);
 							outputs.add(new PrintStream(skt.getOutputStream()));
+							sendTeamAndScheduleInfo();
 						}
 					} catch(IOException e) {
 						
@@ -47,6 +52,7 @@ public class ControlNetworkManager {
 	public void setPort(int port) {
 		this.port = port;
 		close();
+		monitoring = false;
 		init();
 	}
 	
@@ -68,6 +74,34 @@ public class ControlNetworkManager {
 			serverSocket.close();
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void sendTeamAndScheduleInfo() {
+		sendCommand("clearSched");
+		if(control.teams != null) {
+			for(Team t : control.teams.toArray()) {
+				sendCommand("addTeam=" + t.number + "," + t.name);
+			}
+		}
+		if(control.schedule != null) {
+			String setTablesCMD = "setTables=";
+			for(String name : control.schedule.tableNames)
+				setTablesCMD += name + ",";
+			sendCommand(setTablesCMD);
+			sendCommand("setTPT=" + control.schedule.teamsPerTable);
+			
+			Match[] matches = control.schedule.toArray();
+			for(int matchNum = 0; matchNum < matches.length; matchNum++) {
+				Match m = matches[matchNum];
+				for(int table = 0; table < control.schedule.numTables; table++) {
+					if(m.getTeamsOnTable(table) != null) {
+						for(Team t : m.getTeamsOnTable(table)) {
+							sendCommand("assignMatch=" + matchNum + "," + t.number + "," + table);
+						}
+					}
+				}
+			}
 		}
 	}
 	

@@ -78,4 +78,10 @@ public class TeamScheduler extends AbstractTableModel {
 		}
 		return null;
 	}
+	
+	public Match[] toArray() {
+		Match[] array = new Match[matches.size()];
+		matches.toArray(array);
+		return array;
+	}
 }

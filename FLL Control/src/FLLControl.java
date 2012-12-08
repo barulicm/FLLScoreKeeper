@@ -1,13 +1,17 @@
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileFilter;
 
 
 @SuppressWarnings("serial")
@@ -17,10 +21,12 @@ public class FLLControl extends JFrame implements ActionListener {
 	JTextField durationText;
 	ControlNetworkManager network;
 	TeamList teams;
+	TeamScheduler schedule;
 	Thread scoreIterator;
 	long timerStartTime, timerDuration;
 	boolean timerIsRunning;
 	int currentRound;
+	Color defaultButtonColor;
 
 	public FLLControl() {
 		setTitle("FLL Control");
@@ -54,10 +60,13 @@ public class FLLControl extends JFrame implements ActionListener {
 		
 		loadSchedBtn = new JButton("Load");
 		loadSchedBtn.addActionListener(this);
+		defaultButtonColor = loadSchedBtn.getBackground();
+		loadSchedBtn.setBackground(Color.RED);
 		add(loadSchedBtn);
 		
 		setRoundBtn = new JButton("Set round");
 		setRoundBtn.addActionListener(this);
+		setRoundBtn.setEnabled(false);
 		add(setRoundBtn);
 		
 		JLabel scoresLabel = new JLabel("SCORING");
@@ -65,27 +74,31 @@ public class FLLControl extends JFrame implements ActionListener {
 		
 		enterScoreBtn = new JButton("Enter score");
 		enterScoreBtn.addActionListener(this);
+		enterScoreBtn.setEnabled(false);
 		add(enterScoreBtn);
 		
 		exportScoresBtn = new JButton("Export scores");
 		exportScoresBtn.addActionListener(this);
+		exportScoresBtn.setEnabled(false);
 		add(exportScoresBtn);
 		
 		JLabel connectLabel = new JLabel("CONNECTIONS");
 		add(connectLabel);
 		
-		viewConnsBtn = new JButton("View connections");
-		viewConnsBtn.addActionListener(this);
-		add(viewConnsBtn);
+//		viewConnsBtn = new JButton("View connections");
+//		viewConnsBtn.addActionListener(this);
+//		add(viewConnsBtn);
 		
 		setPortBtn = new JButton("Set port number");
 		setPortBtn.addActionListener(this);
+		setPortBtn.setEnabled(false);
 		add(setPortBtn);
 		
 		teams = new TeamList();
-		TeamLoader.LoadTeams("teamforMatchImport.csv", teams, null);
+		schedule = new TeamScheduler();
+//		TeamLoader.LoadTeams("teamforMatchImport.csv", teams, schedule);
 		
-		network = new ControlNetworkManager(9999);
+		network = new ControlNetworkManager(this, 9999);
 		
 		currentRound = 0;
 		
@@ -147,11 +160,34 @@ public class FLLControl extends JFrame implements ActionListener {
 			network.sendCommand("timer="+durationText.getText());
 		}
 		if(e.getSource() == loadSchedBtn) {
-			String input = JOptionPane.showInputDialog(this, "Path to csv schedule:", "teamforMatchImport.csv");
-			if(input != null) {
+			JFileChooser fileChooser = new JFileChooser();
+			fileChooser.setFileFilter(new FileFilter() {
+				@Override
+				public boolean accept(File pathname) {
+					return pathname.getPath().endsWith(".csv");
+				}
+
+				@Override
+				public String getDescription() {
+					return "CSV - Comma Seperated Values";
+				}
+			});
+			fileChooser.showDialog(this, "Open");
+			File file = fileChooser.getSelectedFile();
+			
+			String path = file.getPath();
+			if(path != null) {
 				teams = new TeamList();
-				TeamLoader.LoadTeams(input, teams, null);
-				network.sendCommand("round=0");
+				TeamLoader.LoadTeams(path, teams, schedule);
+				network.sendTeamAndScheduleInfo();
+				
+				setRoundBtn.setEnabled(true);
+				enterScoreBtn.setEnabled(true);
+				exportScoresBtn.setEnabled(true);
+//				viewConnsBtn.setEnabled(true);
+				setPortBtn.setEnabled(true);
+				
+				loadSchedBtn.setBackground(defaultButtonColor);
 			}
 		}
 		if(e.getSource() == setRoundBtn) {

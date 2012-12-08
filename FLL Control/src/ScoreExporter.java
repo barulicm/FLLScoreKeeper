@@ -64,7 +64,7 @@ public class ScoreExporter extends JFrame {
 
 			@Override
 			public String getDescription() {
-				return "FLL Score File";
+				return "SCO - FLL Score File";
 			}
 		});
 		fileChooser.showDialog(se, "Save");
