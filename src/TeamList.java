@@ -106,6 +106,12 @@ public class TeamList extends AbstractTableModel {
 		return null;
 	}
 	
+	public Team[] toArray() {
+		Team[] arr = new Team[teams.size()];
+		teams.toArray(arr);
+		return arr;
+	}
+	
 	public void clear() {
 		teams.clear();
 		startingIndex = 0;

@@ -36,6 +36,7 @@ public class TeamScheduler extends AbstractTableModel {
 		while(round >= matches.size())
 			matches.add(new Match());
 		matches.get(round).addTeam(team, table);
+		fireTableDataChanged();
 	}
 	
 	public List<Team> getCurrentTeams() {
@@ -83,5 +84,19 @@ public class TeamScheduler extends AbstractTableModel {
 		Match[] array = new Match[matches.size()];
 		matches.toArray(array);
 		return array;
+	}
+	
+	public void setTables(String[] tableNames) {
+		this.tableNames = tableNames;
+		this.numTables = tableNames.length;
+		fireTableStructureChanged();
+	}
+
+	public void clear() {
+		currentRound = 0;
+		numTables = 0;
+		teamsPerTable = 0;
+		tableNames = new String[0];
+		matches.clear();
 	}
 }
