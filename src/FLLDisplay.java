@@ -10,6 +10,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
+import javax.swing.UIManager;
 
 //TODO !!! Needs to ask user for what IP / Port to connect to on startup.
 
@@ -25,6 +26,11 @@ public class FLLDisplay extends JFrame {
 	DisplayNetworkManager network;
 	
 	public FLLDisplay () {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		setTitle("FLL Display");
 		setSize(1200,800);
 		setLocation(0,0);

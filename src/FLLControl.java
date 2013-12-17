@@ -11,6 +11,8 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.filechooser.FileFilter;
 
 
@@ -29,6 +31,11 @@ public class FLLControl extends JFrame implements ActionListener {
 	Color defaultButtonColor;
 
 	public FLLControl() {
+		try {
+			UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		setTitle("FLL Control");
 		setLocation(50,50);
 		setSize(250,400);
@@ -164,19 +171,20 @@ public class FLLControl extends JFrame implements ActionListener {
 			fileChooser.setFileFilter(new FileFilter() {
 				@Override
 				public boolean accept(File pathname) {
-					return pathname.getPath().endsWith(".csv");
+					
+					return pathname.isDirectory() || pathname.getPath().endsWith(".csv");
 				}
 
 				@Override
 				public String getDescription() {
-					return "CSV - Comma Seperated Values";
+					return "Comma Seperated Values (*.csv)";
 				}
 			});
 			fileChooser.showDialog(this, "Open");
 			File file = fileChooser.getSelectedFile();
 			
-			String path = file.getPath();
-			if(path != null) {
+			if(file != null) {
+				String path = file.getPath();
 				teams = new TeamList();
 				TeamLoader.LoadTeams(path, teams, schedule);
 				network.sendTeamAndScheduleInfo();
