@@ -60,9 +60,11 @@ MainWindow::MainWindow(QWidget *parent) :
         vector<int> nextTeamNumbers;
         for(const auto& team : nextTeams)
             nextTeamNumbers.push_back((team.get() != nullptr ? team->getNumber() : 0));
+        nextTeamNumbers.push_back(1010);
+        nextTeamNumbers.push_back(4468);
         server.sendData(ui->timer_display_lineEdit->text().toStdString(), schedule.getCurrentMatch(), nextTeamNumbers, teams);
     });
-    networkTimer.start(500);
+    networkTimer.start(100);
 }
 
 MainWindow::~MainWindow()

@@ -24,7 +24,7 @@ public:
 
 protected slots:
 
-    void on_client_dataReady(std::string timerText, int currentMatch, std::vector<int> nextTeamNumbers, std::vector<Team> teams);
+    void clientDataReady(std::string timerText, int currentMatch, std::vector<int> nextTeamNumbers, std::vector<Team> teams);
 
     void showContextMenu(const QPoint& pos);
 

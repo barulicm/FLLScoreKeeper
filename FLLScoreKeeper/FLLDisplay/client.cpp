@@ -1,5 +1,8 @@
 #include "client.h"
 #include <iostream>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 using namespace std;
 
@@ -10,7 +13,7 @@ Client::Client(QObject *parent)
     socket.bind(QHostAddress::AnyIPv4, 8008, QUdpSocket::ShareAddress);
     socket.joinMulticastGroup(QHostAddress("239.255.1.1"));
 
-    connect(&socket, SIGNAL(readyRead()), this, SLOT(dataReceived()));
+    connect(&socket, &QUdpSocket::readyRead, this, &Client::dataReceived);
 }
 
 void Client::setMulticastInformation(QHostAddress address, quint16 port)
@@ -31,38 +34,33 @@ void Client::dataReceived()
             continue;
         }
 
-        QStringList dataTokens = QString(datagram.toStdString().c_str()).split("|");
+        QJsonDocument jsonDoc = QJsonDocument::fromBinaryData(datagram);
 
-        std::string timerText = dataTokens[0].toStdString();
-        dataTokens.erase(dataTokens.begin());
+        QJsonObject jsonMessage = jsonDoc.object();
 
-        int currentMatch = stoi(dataTokens[0].toStdString());
-        dataTokens.erase(dataTokens.begin());
+        string timerText = jsonMessage["TimerText"].toString().toStdString();
+
+        int currentMatch = jsonMessage["CurrentMatch"].toInt();
 
         vector<int> nextTeamNumbers;
-        if(!dataTokens[0].isEmpty()) {
-            QStringList nextTeamTokens = dataTokens[0].split(",");
-            for(QString& token : nextTeamTokens) {
-                nextTeamNumbers.push_back(token.toInt());
-            }
-        } else {
-            nextTeamNumbers = {0,0,0,0,0,0};
+        auto jsonNextTeams = jsonMessage["NextMatchTeamNumbers"].toArray();
+        for(auto value : jsonNextTeams) {
+            nextTeamNumbers.push_back(value.toInt());
         }
-        dataTokens.erase(dataTokens.begin());
 
         vector<Team> teams;
-        for(QString& teamToken : dataTokens) {
-            if(teamToken.isEmpty())
-                continue;
-            auto teamTokens = teamToken.split(",");
+        auto jsonTeams = jsonMessage["Teams"].toArray();
+        for(auto value : jsonTeams) {
             Team team;
-            team.setNumber(stoi(teamTokens[0].toStdString()));
-            team.setName(teamTokens[1].toStdString());
-            team.setScore(1,stoi(teamTokens[2].toStdString()));
-            team.setScore(2,stoi(teamTokens[3].toStdString()));
-            team.setScore(3,stoi(teamTokens[4].toStdString()));
+            QJsonObject valueObj = value.toObject();
+            team.setName(valueObj["Name"].toString().toStdString());
+            team.setNumber(valueObj["Number"].toInt());
+            team.setScore(1, valueObj["Round1"].toInt());
+            team.setScore(2, valueObj["Round2"].toInt());
+            team.setScore(3, valueObj["Round3"].toInt());
             teams.push_back(team);
         }
+
         emit dataReady(timerText, currentMatch, nextTeamNumbers, teams);
     }
 }

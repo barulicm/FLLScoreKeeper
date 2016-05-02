@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     this->grabKeyboard();
 
-    connect(&client, &Client::dataReady, this, &MainWindow::on_client_dataReady);
+    connect(&client, &Client::dataReady, this, &MainWindow::clientDataReady);
 
     this->setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -27,17 +27,25 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_client_dataReady(string timerText, int currentMatch, std::vector<int> nextTeamNumbers, vector<Team> teams)
+void MainWindow::clientDataReady(std::string timerText, int currentMatch, std::vector<int> nextTeamNumbers, std::vector<Team> teams)
 {
     ui->timer_label->setText(timerText.c_str());
     ui->currentMatch_label->setText( ("Current Match: " + to_string(currentMatch)).c_str());
 
-    ui->next_A_label->setText( ("A: " + to_string(nextTeamNumbers[0])).c_str() );
-    ui->next_B_label->setText( ("B: " + to_string(nextTeamNumbers[1])).c_str() );
-    ui->next_C_label->setText( ("C: " + to_string(nextTeamNumbers[2])).c_str() );
-    ui->next_D_label->setText( ("D: " + to_string(nextTeamNumbers[3])).c_str() );
-    ui->next_E_label->setText( ("E: " + to_string(nextTeamNumbers[4])).c_str() );
-    ui->next_F_label->setText( ("F: " + to_string(nextTeamNumbers[5])).c_str() );
+    vector<QLabel*> labels = { ui->next_A_label,
+                               ui->next_B_label,
+                               ui->next_C_label,
+                               ui->next_D_label,
+                               ui->next_E_label,
+                               ui->next_F_label };
+    vector<string> letters = { "A", "B", "C", "D", "E", "F" };
+
+    for(size_t i = 0; i < nextTeamNumbers.size(); i++) {
+        labels[i]->setText( (letters[i] + ": " + to_string(nextTeamNumbers[i])).c_str());
+    }
+    for(size_t i = nextTeamNumbers.size(); i < 6; i++) {
+        labels[i]->hide();
+    }
 
     ui->tableWidget->clear();
     ui->tableWidget->setRowCount(teams.size());

@@ -1,30 +1,43 @@
 #include "server.h"
 #include <iostream>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
 
 using namespace std;
 
 Server::Server()
-    : socket(this)
+    : socket(this),
+      address("239.255.1.1"),
+      port(8008)
 {
 }
 
 void Server::sendData(string timerText, int currentMatch, std::vector<int> nextMatchTeamNumbers, vector<shared_ptr<Team>>& teams)
 {
-    string data;
-    data += timerText + "|";
-    data += to_string(currentMatch) + "|";
-    for(const int& teamNumber : nextMatchTeamNumbers) {
-        data += to_string(teamNumber) + ",";
+    QJsonObject jsonMessage;
+
+    jsonMessage.insert("TimerText", timerText.c_str());
+    jsonMessage.insert("CurrentMatch", currentMatch);
+    QJsonArray jsonNextMatch;
+    for(auto &number : nextMatchTeamNumbers) {
+        jsonNextMatch.push_back(number);
     }
-    data += "|";
-    for(shared_ptr<Team>& team : teams) {
-        data += to_string(team->getNumber()) + "," +
-                team->getName() + "," +
-                to_string(team->getScoreForRound(1)) + "," +
-                to_string(team->getScoreForRound(2)) + "," +
-                to_string(team->getScoreForRound(3)) + "|";
+    jsonMessage.insert("NextMatchTeamNumbers", jsonNextMatch);
+
+    QJsonArray jsonTeams;
+    for(shared_ptr<Team> &team : teams) {
+        QJsonObject jsonTeam;
+        jsonTeam.insert("Number", team->getNumber());
+        jsonTeam.insert("Name", team->getName().c_str());
+        jsonTeam.insert("Round1", team->getScoreForRound(1));
+        jsonTeam.insert("Round2", team->getScoreForRound(2));
+        jsonTeam.insert("Round3", team->getScoreForRound(3));
+        jsonTeams.append(jsonTeam);
     }
-    socket.writeDatagram(QByteArray::fromStdString(data), address, port);
+    jsonMessage.insert("Teams", jsonTeams);
+
+    socket.writeDatagram(QJsonDocument(jsonMessage).toBinaryData(), address, port);
 }
 
 void Server::setMulticastInformation(QHostAddress address, quint16 port)

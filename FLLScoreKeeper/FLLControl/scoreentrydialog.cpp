@@ -1,8 +1,6 @@
 #include "scoreentrydialog.h"
 #include "ui_scoreentrydialog.h"
 #include <QDir>
-#include <QWebElement>
-#include <QWebFrame>
 #include <iostream>
 
 using namespace std;
